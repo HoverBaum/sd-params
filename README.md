@@ -1,5 +1,8 @@
 # SD Param Explorer
 
+Status: Proof of Concept
+
+Simple web app to explore parameters used to create Stable Diffusion generated images. Under the hood this tool reads the exif data in image files and extracts the information from there.
 
 ## Development
 
