@@ -32,9 +32,9 @@ export default function Home() {
             height={3072}
           />
           <div>
-            <h1 className="text-5xl font-bold">Params Explorer</h1>
+            <h1 className="text-5xl font-bold">SD Params Explorer</h1>
             <p className="py-6">
-              Browser your past creations and see the prompts you've used.
+              Browser your past creations and see the prompts you&apos;ve used.
             </p>
             <HomeButton />
           </div>
