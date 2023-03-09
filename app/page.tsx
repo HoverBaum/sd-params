@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import { HomeButton } from './HomeButton'
 
 export default function Home() {
@@ -39,6 +40,22 @@ export default function Home() {
             <HomeButton />
           </div>
         </div>
+      </div>
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2">
+        <p>
+          Created by{' '}
+          <Link className="link link-primary" href="https://hoverbaum.net/me">
+            Hendrik
+          </Link>{' '}
+          on{' '}
+          <Link
+            className="link link-primary"
+            href="https://github.com/HoverBaum/sd-params"
+          >
+            GitHub
+          </Link>
+          .
+        </p>
       </div>
     </main>
   )
