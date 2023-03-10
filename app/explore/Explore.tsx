@@ -30,7 +30,7 @@ export const Explore = () => {
     if (selectedImage.parsedForParams) return
     const parseData = async () => {
       const data = await exifr.parse(selectedImage.file)
-      console.log(data)
+
       const rawParams = data.parameters as string
       if (!rawParams)
         return setSelectedImage({
@@ -38,9 +38,8 @@ export const Explore = () => {
           parsedForParams: true,
           paramsError: 'No parameters found in image',
         })
-      console.log(rawParams)
+
       const params = parseRawParams(rawParams)
-      console.log(params)
       setSelectedImage({
         ...selectedImage,
         parsedForParams: true,
@@ -116,6 +115,22 @@ export const Explore = () => {
             {selectedImage.params && (
               <div>
                 <BaseParams params={selectedImage.params} />
+                <button
+                  className="btn btn-block btn-outline mt-4"
+                  onClick={() => {
+                    if (!selectedImage.rawParams) return
+                    navigator.clipboard.writeText(selectedImage.rawParams).then(
+                      () => {
+                        /* clipboard successfully set */
+                      },
+                      () => {
+                        /* clipboard write failed */
+                      }
+                    )
+                  }}
+                >
+                  Copy generation data
+                </button>
               </div>
             )}
           </div>
