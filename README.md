@@ -1,10 +1,31 @@
 # SD Param Explorer
 
-Status: Proof of Concept
+⚠️ Status: Technical Proof of Concept
 
 Simple web app to explore parameters used to create Stable Diffusion generated images. Under the hood this tool reads the exif data in image files and extracts the information from there.
 
-## Development
+
+## Contributing
+
+Contributions are super welcome. Be it code improvements, UI suggestions or anything else.
+
+### Guiding principles
+
+In every software project the question "what to focus on" arises on a daily basis. To help us in this question, we postulate a few guiding principles.
+
+1. We value polished and "juicy" features that make users happy over the amount of available features.
+2. When introducing new features we value thought through processes including reafactoring that make the application coherrent over adding a feature fast.
+3. To support the above we value "re-factorable" code over architectures that try to take all possible future cases into consideration.
+4. We value features in the hand of our users over fully polished features.
+
+### State of the project
+
+This is currently a proof of concept. It shows that we can:
+
+- Read files from a folder on users computer
+- Display Parameters extracted from Exif data
+
+### Development
 
 First, run the development server:
 
