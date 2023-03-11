@@ -9,7 +9,7 @@ export const BaseParams = ({ params }: { params: SDParameterType }) => {
       </p>
       <p className="mb-2">
         <span className="block font-bold">Negative Prompt</span>
-        <span>{params.negativePrompt}</span>
+        <span>{params.negativePrompt || 'none'}</span>
       </p>
       <div className="grid grid-cols-2 md:grid-cols-4">
         <p className="mb-2">

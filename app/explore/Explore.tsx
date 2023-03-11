@@ -51,12 +51,10 @@ export const Explore = () => {
   }, [selectedImage])
 
   useEffect(() => {
-    console.log('effect', dirHandle)
     const loadImages = async () => {
       const files: FileType[] = []
       if (!dirHandle) return router.push('/')
       for await (const [key, value] of dirHandle.entries()) {
-        console.log({ key, value })
         if (value.kind === 'file') {
           const file = await value.getFile()
           file.type.startsWith('image/') &&

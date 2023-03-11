@@ -1,4 +1,3 @@
-// some.test.ts
 import tap from 'tap'
 import { SDParameterType, parseRawParams } from './parseRawParams'
 
@@ -62,6 +61,36 @@ tap.test('Parsing extra params in ""', (t) => {
     actual,
     expected,
     'Understand params in " to be their own even with commas'
+  )
+  t.end()
+})
+
+tap.test('Parsing data without negative prompt', (t) => {
+  const rawParams = `chromatic goddess of colors, dramatic lighting, illustration by dgtlv2
+  Steps: 28, Sampler: LMS, CFG scale: 7, Seed: 1501367136, Size: 512x512, Model hash: 88ecb78256, Denoising strength: 0.5, Hires upscale: 2, Hires steps: 20, Hires upscaler: 4x_foolhardy_Remacri`
+
+  const expected: SDParameterType = {
+    prompt:
+      'chromatic goddess of colors, dramatic lighting, illustration by dgtlv2',
+    'CFG scale': 7,
+    Steps: 28,
+    Sampler: 'LMS',
+    Seed: 1501367136,
+    Size: '512x512',
+    'Model hash': '88ecb78256',
+    'Denoising strength': 0.5,
+    'Hires upscale': 2,
+    'Hires steps': 20,
+    'Hires upscaler': '4x_foolhardy_Remacri',
+    negativePrompt: '',
+  }
+
+  const actual = parseRawParams(rawParams)
+
+  t.strictSame(
+    actual,
+    expected,
+    'Data with no negative prompt is parsed correctly'
   )
   t.end()
 })

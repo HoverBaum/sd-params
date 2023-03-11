@@ -14,12 +14,14 @@ const COMMA_PLACEHOLDER = 'COMMA_PLACEHOLDER'
 export const parseRawParams = (rawParams: string): SDParameterType => {
   const rawParamsLines = rawParams.split('\n')
   const prompt = rawParamsLines[0]
-  const negativePrompt = rawParamsLines[1]
-    .replace('Negative prompt: ', '')
-    .trim()
+  const hasNegativePrompt = rawParamsLines.length >= 3
+  const negativePrompt = hasNegativePrompt
+    ? rawParamsLines[1].replace('Negative prompt: ', '').trim()
+    : ''
 
   // Handle all other params on third line.
-  let additionalParamsLine = rawParamsLines[2]
+  const additionalParamsIndex = hasNegativePrompt ? 2 : 1
+  let additionalParamsLine = rawParamsLines[additionalParamsIndex]
 
   // Replace all commoas in additionParamsLine with placeholders by walking through the string between "s.
   if (/(".+?,.+?")/g.test(additionalParamsLine)) {
