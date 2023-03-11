@@ -1,10 +1,10 @@
 'use client'
 
-import exifr from 'exifr'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useDirHandle } from '../DirHandleContext'
+import ExifReader from 'exifreader'
 import { AllParams } from './AllParams'
 import { BaseParams } from './BaseParams'
 import { parseRawParams, SDParameterType } from './parseRawParams'
@@ -29,9 +29,9 @@ export const Explore = () => {
     if (!selectedImage) return
     if (selectedImage.parsedForParams) return
     const parseData = async () => {
-      const data = await exifr.parse(selectedImage.file)
+      const exifReaderData = await ExifReader.load(selectedImage.file)
 
-      const rawParams = data.parameters as string
+      const rawParams = exifReaderData.parameters.value as string
       if (!rawParams)
         return setSelectedImage({
           ...selectedImage,
