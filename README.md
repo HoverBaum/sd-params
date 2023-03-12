@@ -2,6 +2,8 @@
 
 ⚠️ Status: Technical Proof of Concept
 
+Contributions welcome 😁
+
 ![Landing page of SD-Params Explorer.](assets/sd-params-home.png)
 
 Web app to explore parameters used to create Stable-Diffusion generated images. Under the hood this tool reads the exif data in image files and extracts the information from there.
@@ -44,10 +46,8 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - [Vercel](https://vercel.com/) for hosting.
 - [Tailwind CSS](https://tailwindcss.com/) for styling
 - [Daisy UI](https://daisyui.com/) component library based on Tailwind.
-- [ExifR](https://github.com/MikeKovarik/exifr) to parse Exif data. (To be replaced)
+- [ExifReader](https://github.com/mattiasw/ExifReader) to parse Exif data.
 
 ### Resources
 
 Color palette from home screen image: https://coolors.co/dd63be-853991-131a2a-2c4b54-faad30 
-
-Exif library https://github.com/MikeKovarik/exifr undmaintained but gets the job done. Another, more maintained library https://github.com/mattiasw/ExifReader sadly doesn't support exif extraction from PNGs.
