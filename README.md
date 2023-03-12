@@ -1,12 +1,12 @@
 # SD Param Explorer
 
-⚠️ Status: Technical Proof of Concept
+⚠️ Status: Technical Proof of Concept ⚠️
+
+Web app to explore parameters used for Stable-Diffusion generated images. Under the hood this tool reads the exif data in image files and extracts the information from there.
 
 Contributions welcome 😁
 
 ![Landing page of SD-Params Explorer.](assets/sd-params-home.png)
-
-Web app to explore parameters used to create Stable-Diffusion generated images. Under the hood this tool reads the exif data in image files and extracts the information from there.
 
 ![View of exploring SD Parameters.](assets/sd-params-explore.png)
 
