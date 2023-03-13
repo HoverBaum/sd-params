@@ -46,7 +46,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - [Vercel](https://vercel.com/) for hosting.
 - [Tailwind CSS](https://tailwindcss.com/) for styling
 - [Daisy UI](https://daisyui.com/) component library based on Tailwind.
-- [ExifReader](https://github.com/mattiasw/ExifReader) to parse Exif data.
+- [ExifReader](https://github.com/mattiasw/ExifReader) to parse Exif data and read parameters from tEXt.
 
 ### Resources
 

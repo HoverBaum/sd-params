@@ -30,14 +30,15 @@ export const Explore = () => {
     if (selectedImage.parsedForParams) return
     const parseData = async () => {
       const exifReaderData = await ExifReader.load(selectedImage.file)
+      console.log('Raw Data', exifReaderData)
 
-      const rawParams = exifReaderData.parameters.value as string
-      if (!rawParams)
+      if (!exifReaderData.parameters)
         return setSelectedImage({
           ...selectedImage,
           parsedForParams: true,
           paramsError: 'No parameters found in image',
         })
+      const rawParams = exifReaderData.parameters.value as string
 
       const params = parseRawParams(rawParams)
       setSelectedImage({
