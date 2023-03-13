@@ -34,9 +34,16 @@ export default function Home() {
           />
           <div>
             <h1 className="text-5xl font-bold">SD Params Explorer</h1>
-            <p className="py-6">
-              Browser your past creations and see the prompts you&apos;ve used.
-            </p>
+
+            <section className="py-8">
+              <ul>
+                <li className="mb-2">
+                  Browser your past creations and see the prompts you&apos;ve
+                  used.
+                </li>
+                <li>Runs on your machines, no images are every uploaded!</li>
+              </ul>
+            </section>
             <HomeButton />
           </div>
         </div>
