@@ -38,7 +38,7 @@ export const Explore = () => {
           parsedForParams: true,
           paramsError: 'No parameters found in image',
         })
-      const rawParams = exifReaderData.parameters.value as string
+      const rawParams = exifReaderData.parameters.description as string
 
       const params = parseRawParams(rawParams)
       setSelectedImage({
