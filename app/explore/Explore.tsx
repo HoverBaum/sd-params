@@ -82,20 +82,18 @@ export const Explore = () => {
       </div>
       <div className="col-span-4 overflow-y-scroll grid grid-cols-3 gap-2">
         {files.map((file) => (
-          <div
-            key={file.name}
-            className={`${
-              selectedImage &&
-              selectedImage.name === file.name &&
-              'border-4 border-primary'
-            }`}
-          >
+          <div key={file.name}>
             <img
               src={file.src}
               alt={file.name}
               onClick={() => {
                 setSelectedImage(file)
               }}
+              className={`${
+                selectedImage &&
+                selectedImage.name === file.name &&
+                'border-4 border-primary'
+              }`}
             />
           </div>
         ))}
