@@ -24,32 +24,56 @@ export const Explore = () => {
   const [files, setFiles] = useState<FileType[]>([])
   const router = useRouter()
   const [selectedImage, setSelectedImage] = useState<FileType>()
+  const [searchString, setSearchString] = useState<string>('')
+
+  const paramsForFile = async (file: File) => {
+    const exifReaderData = await ExifReader.load(file)
+    console.log('Raw Data', exifReaderData)
+
+    if (!exifReaderData.parameters)
+      return {
+        parsedForParams: true,
+        paramsError: 'No parameters found in image',
+      }
+    const rawParams = exifReaderData.parameters.description as string
+
+    const params = parseRawParams(rawParams)
+    return {
+      parsedForParams: true,
+      rawParams,
+      params,
+    }
+  }
+
+  // useEffect(() => {
+  //   if (!selectedImage) return
+  //   if (selectedImage.parsedForParams) return
+  //   const parseData = async () => {
+  //     const exifReaderData = await ExifReader.load(selectedImage.file)
+  //     console.log('Raw Data', exifReaderData)
+
+  //     if (!exifReaderData.parameters)
+  //       return setSelectedImage({
+  //         ...selectedImage,
+  //         parsedForParams: true,
+  //         paramsError: 'No parameters found in image',
+  //       })
+  //     const rawParams = exifReaderData.parameters.description as string
+
+  //     const params = parseRawParams(rawParams)
+  //     setSelectedImage({
+  //       ...selectedImage,
+  //       parsedForParams: true,
+  //       rawParams,
+  //       params,
+  //     })
+  //   }
+  //   parseData()
+  // }, [selectedImage])
 
   useEffect(() => {
-    if (!selectedImage) return
-    if (selectedImage.parsedForParams) return
-    const parseData = async () => {
-      const exifReaderData = await ExifReader.load(selectedImage.file)
-      console.log('Raw Data', exifReaderData)
-
-      if (!exifReaderData.parameters)
-        return setSelectedImage({
-          ...selectedImage,
-          parsedForParams: true,
-          paramsError: 'No parameters found in image',
-        })
-      const rawParams = exifReaderData.parameters.description as string
-
-      const params = parseRawParams(rawParams)
-      setSelectedImage({
-        ...selectedImage,
-        parsedForParams: true,
-        rawParams,
-        params,
-      })
-    }
-    parseData()
-  }, [selectedImage])
+    setSelectedImage(undefined)
+  }, [searchString])
 
   useEffect(() => {
     const loadImages = async () => {
@@ -58,13 +82,16 @@ export const Explore = () => {
       for await (const [key, value] of dirHandle.entries()) {
         if (value.kind === 'file') {
           const file = await value.getFile()
-          file.type.startsWith('image/') &&
-            files.push({
+          if (file.type.startsWith('image/')) {
+            const paramsData = await paramsForFile(file)
+            const fileData: FileType = {
               src: URL.createObjectURL(file),
               name: file.name,
               file,
-              parsedForParams: false,
-            })
+              ...paramsData,
+            }
+            files.push(fileData)
+          }
         }
       }
       setFiles(files)
@@ -79,24 +106,38 @@ export const Explore = () => {
           Param Explorer
         </Link>
         <span>Exploring: {dirHandle?.name}</span>
+        <div>
+          <input
+            type="text"
+            placeholder="Search prompts"
+            className="input input-bordered w-full max-w-xs"
+            onChange={(e) => setSearchString(e.target.value)}
+          />
+        </div>
       </div>
+
       <div className="col-span-4 overflow-y-scroll grid grid-cols-3 gap-2">
-        {files.map((file) => (
-          <div key={file.name}>
-            <img
-              src={file.src}
-              alt={file.name}
-              onClick={() => {
-                setSelectedImage(file)
-              }}
-              className={`${
-                selectedImage &&
-                selectedImage.name === file.name &&
-                'border-4 border-primary'
-              }`}
-            />
-          </div>
-        ))}
+        {files
+          .filter((file) => {
+            if (searchString === '') return true
+            return file.params?.prompt?.includes(searchString)
+          })
+          .map((file) => (
+            <div key={file.name}>
+              <img
+                src={file.src}
+                alt={file.name}
+                onClick={() => {
+                  setSelectedImage(file)
+                }}
+                className={`${
+                  selectedImage &&
+                  selectedImage.name === file.name &&
+                  'border-4 border-primary'
+                }`}
+              />
+            </div>
+          ))}
       </div>
 
       {/* Image display */}
