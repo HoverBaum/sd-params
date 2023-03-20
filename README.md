@@ -1,7 +1,5 @@
 # SD Param Explorer
 
-⚠️ Status: Technical Proof of Concept ⚠️
-
 Web app to explore parameters used for Stable-Diffusion generated images. Under the hood this tool reads the exif data in image files and extracts the information from there.
 
 Contributions welcome 😁
@@ -23,13 +21,6 @@ In every software project the question "what to focus on" arises on a daily basi
 3. To support the above we value "re-factorable" code over architectures that try to take all possible future cases into consideration.
 4. We value features in the hand of our users over fully polished features.
 
-### State of the project
-
-This is currently a proof of concept. It shows that we can:
-
-- Read files from a folder on users computer
-- Display Parameters extracted from Exif data
-
 ### Development
 
 First, run the development server:
@@ -47,7 +38,3 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - [Tailwind CSS](https://tailwindcss.com/) for styling
 - [Daisy UI](https://daisyui.com/) component library based on Tailwind.
 - [ExifReader](https://github.com/mattiasw/ExifReader) to parse Exif data and read parameters from tEXt.
-
-### Resources
-
-Color palette from home screen image: https://coolors.co/dd63be-853991-131a2a-2c4b54-faad30 

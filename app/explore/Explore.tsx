@@ -8,6 +8,7 @@ import ExifReader from 'exifreader'
 import { AllParams } from './AllParams'
 import { BaseParams } from './BaseParams'
 import { parseRawParams, SDParameterType } from './parseRawParams'
+import Fuse from 'fuse.js'
 
 type FileType = {
   src: string
@@ -25,6 +26,8 @@ export const Explore = () => {
   const router = useRouter()
   const [selectedImage, setSelectedImage] = useState<FileType>()
   const [searchString, setSearchString] = useState<string>('')
+  const [isUsingSearch, setIsUsingSearch] = useState<boolean>(false)
+  const [images, setImages] = useState<FileType[]>([])
 
   const paramsForFile = async (file: File) => {
     const exifReaderData = await ExifReader.load(file)
@@ -45,36 +48,42 @@ export const Explore = () => {
     }
   }
 
-  // useEffect(() => {
-  //   if (!selectedImage) return
-  //   if (selectedImage.parsedForParams) return
-  //   const parseData = async () => {
-  //     const exifReaderData = await ExifReader.load(selectedImage.file)
-  //     console.log('Raw Data', exifReaderData)
+  // Scroll #imageDisplay to top when image changes.
+  useEffect(() => {
+    const imageDisplay = document.getElementById('imageDisplay')
+    if (imageDisplay) imageDisplay.scrollTop = 0
+  }, [selectedImage])
 
-  //     if (!exifReaderData.parameters)
-  //       return setSelectedImage({
-  //         ...selectedImage,
-  //         parsedForParams: true,
-  //         paramsError: 'No parameters found in image',
-  //       })
-  //     const rawParams = exifReaderData.parameters.description as string
+  // Clear search string when search is closed.
+  useEffect(() => {
+    if (!isUsingSearch) setSearchString('')
+  }, [isUsingSearch])
 
-  //     const params = parseRawParams(rawParams)
-  //     setSelectedImage({
-  //       ...selectedImage,
-  //       parsedForParams: true,
-  //       rawParams,
-  //       params,
-  //     })
-  //   }
-  //   parseData()
-  // }, [selectedImage])
-
+  // Filter images when search string changes.
   useEffect(() => {
     setSelectedImage(undefined)
-  }, [searchString])
 
+    if (searchString === '') {
+      setImages(files)
+    } else {
+      // Find all matches using fuse
+      const fuse = new Fuse(files, {
+        // Lowering the default threshold, this onyl matches things close to the query.
+        threshold: 0.3,
+        // Only start matching from 2 chars onwards.
+        minMatchCharLength: 2,
+        // We want to filter and keep original order.
+        shouldSort: false,
+        keys: ['params.prompt'],
+      })
+      const filterResults = fuse
+        .search(searchString)
+        .map((result) => result.item)
+      setImages(filterResults)
+    }
+  }, [files, searchString])
+
+  // Load all files or direct pack to landing page if no dirHandler.
   useEffect(() => {
     const loadImages = async () => {
       const files: FileType[] = []
@@ -100,29 +109,40 @@ export const Explore = () => {
   }, [dirHandle, router])
 
   return (
-    <div className="w-screen h-screen grid grid-cols-12">
-      <div className="navbar bg-base-100 col-span-12">
-        <Link href="/" className="btn btn-ghost normal-case text-xl">
-          Param Explorer
-        </Link>
-        <span>Exploring: {dirHandle?.name}</span>
-        <div>
-          <input
-            type="text"
-            placeholder="Search prompts"
-            className="input input-bordered w-full max-w-xs"
-            onChange={(e) => setSearchString(e.target.value)}
-          />
+    <div className="w-screen h-screen grid grid-cols-1">
+      <div className="border-b-2 shadow">
+        <div className="navbar bg-base-100">
+          <div className="flex-1">
+            <Link href="/" className="btn btn-ghost normal-case text-xl">
+              Param Explorer
+            </Link>
+            <span>Exploring: {dirHandle?.name}</span>
+          </div>
+          <div className="flex-none">
+            <button
+              className="btn btn-outline"
+              onClick={() => setIsUsingSearch((value) => !value)}
+            >
+              Toggle Search
+            </button>
+          </div>
         </div>
+
+        {isUsingSearch && (
+          <div className="p-2">
+            <input
+              type="text"
+              placeholder="Search prompts"
+              className="input input-bordered w-full max-w-xs"
+              onChange={(e) => setSearchString(e.target.value)}
+            />
+          </div>
+        )}
       </div>
 
-      <div className="col-span-4 overflow-y-scroll grid grid-cols-3 gap-2">
-        {files
-          .filter((file) => {
-            if (searchString === '') return true
-            return file.params?.prompt?.includes(searchString)
-          })
-          .map((file) => (
+      <div className="grid grid-cols-12 overflow-hidden">
+        <div className="overflow-y-scroll py-2 h-full px-4 col-span-4 grid grid-cols-3 gap-2 auto-rows-min border-r-2">
+          {images.map((file) => (
             <div key={file.name}>
               <img
                 src={file.src}
@@ -138,71 +158,77 @@ export const Explore = () => {
               />
             </div>
           ))}
-      </div>
-
-      {/* Image display */}
-      <div className="col-span-8 p-4 overflow-y-scroll">
-        {selectedImage && (
-          <div className="grid grid-cols-2 gap-4">
-            <img
-              className="w-[512px]"
-              src={selectedImage.src}
-              alt={selectedImage.name}
-            />
-
-            {selectedImage.params && (
-              <div>
-                <BaseParams params={selectedImage.params} />
-                <button
-                  className="btn btn-block btn-outline mt-4"
-                  onClick={() => {
-                    if (!selectedImage.rawParams) return
-                    navigator.clipboard.writeText(selectedImage.rawParams).then(
-                      () => {
-                        /* clipboard successfully set */
-                      },
-                      () => {
-                        /* clipboard write failed */
-                      }
-                    )
-                  }}
-                >
-                  Copy generation data
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="mt-4">
-          {selectedImage && selectedImage.params && (
-            <AllParams params={selectedImage.params} />
-          )}
         </div>
 
-        {/* Error case */}
-        {selectedImage && selectedImage.paramsError && (
-          <div className="p-4">
-            <div className="alert alert-error shadow-lg">
-              <div>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="stroke-current flex-shrink-0 h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <span>{selectedImage.paramsError}</span>
+        {/* Image display */}
+        <div
+          className="col-span-8 p-4 overflow-y-scroll pt-2"
+          id="imageDisplay"
+        >
+          {selectedImage && (
+            <div className="grid grid-cols-2 gap-4">
+              <img
+                className="w-[512px]"
+                src={selectedImage.src}
+                alt={selectedImage.name}
+              />
+
+              {selectedImage.params && (
+                <div>
+                  <BaseParams params={selectedImage.params} />
+                  <button
+                    className="btn btn-block btn-outline mt-4"
+                    onClick={() => {
+                      if (!selectedImage.rawParams) return
+                      navigator.clipboard
+                        .writeText(selectedImage.rawParams)
+                        .then(
+                          () => {
+                            /* clipboard successfully set */
+                          },
+                          () => {
+                            /* clipboard write failed */
+                          }
+                        )
+                    }}
+                  >
+                    Copy generation data
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="mt-4">
+            {selectedImage && selectedImage.params && (
+              <AllParams params={selectedImage.params} />
+            )}
+          </div>
+
+          {/* Error case */}
+          {selectedImage && selectedImage.paramsError && (
+            <div className="p-4">
+              <div className="alert alert-error shadow-lg">
+                <div>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="stroke-current flex-shrink-0 h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span>{selectedImage.paramsError}</span>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   )
