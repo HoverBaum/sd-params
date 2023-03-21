@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useDirHandle } from '../DirHandleContext'
 import ExifReader from 'exifreader'
 import { AllParams } from './AllParams'
@@ -31,7 +31,6 @@ export const Explore = () => {
 
   const paramsForFile = async (file: File) => {
     const exifReaderData = await ExifReader.load(file)
-    console.log('Raw Data', exifReaderData)
 
     if (!exifReaderData.parameters)
       return {
@@ -84,29 +83,32 @@ export const Explore = () => {
   }, [files, searchString])
 
   // Load all files or direct pack to landing page if no dirHandler.
-  useEffect(() => {
-    const loadImages = async () => {
-      const files: FileType[] = []
-      if (!dirHandle) return router.push('/')
-      for await (const [key, value] of dirHandle.entries()) {
-        if (value.kind === 'file') {
-          const file = await value.getFile()
-          if (file.type.startsWith('image/')) {
-            const paramsData = await paramsForFile(file)
-            const fileData: FileType = {
-              src: URL.createObjectURL(file),
-              name: file.name,
-              file,
-              ...paramsData,
-            }
-            files.push(fileData)
+  const loadImages = async () => {
+    setFiles([])
+    const files: FileType[] = []
+    if (!dirHandle) return router.push('/')
+    for await (const [key, value] of dirHandle.entries()) {
+      if (value.kind === 'file') {
+        const file = await value.getFile()
+        if (file.type.startsWith('image/')) {
+          const paramsData = await paramsForFile(file)
+          const fileData: FileType = {
+            src: URL.createObjectURL(file),
+            name: file.name,
+            file,
+            ...paramsData,
           }
+          files.push(fileData)
         }
       }
-      setFiles(files)
     }
+    setFiles(files)
+  }
+
+  // Initially load all images from dirHandle.
+  useEffect(() => {
     loadImages()
-  }, [dirHandle, router])
+  }, [])
 
   return (
     <div className="w-screen h-screen grid grid-cols-1">
@@ -120,7 +122,13 @@ export const Explore = () => {
           </div>
           <div className="flex-none">
             <button
-              className="btn btn-outline"
+              className="btn btn-outline btn-sm mr-4"
+              onClick={() => loadImages()}
+            >
+              Reload folder
+            </button>
+            <button
+              className="btn btn-outline btn-sm"
               onClick={() => setIsUsingSearch((value) => !value)}
             >
               Toggle Search
@@ -141,9 +149,15 @@ export const Explore = () => {
       </div>
 
       <div className="grid grid-cols-12 overflow-hidden">
-        <div className="overflow-y-scroll py-2 h-full px-4 col-span-4 grid grid-cols-3 gap-2 auto-rows-min border-r-2">
+        <div className="animate-fadeIn overflow-y-scroll py-2 h-full px-4 col-span-4 grid grid-cols-3 xl:grid-cols-4 gap-2 auto-rows-min border-r-2">
+          {/* While there are no images yet, we display a Skeleton. */}
+          {!files.length &&
+            Array.from({ length: 17 }, (_, index) => index + 1).map((i) => (
+              <div className="animate-pulse bg-base-300 h-[9rem]" key={i}></div>
+            ))}
+
           {images.map((file) => (
-            <div key={file.name}>
+            <div key={file.name} className="animate-fadeIn">
               <img
                 src={file.src}
                 alt={file.name}
