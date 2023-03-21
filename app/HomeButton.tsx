@@ -10,11 +10,6 @@ export const HomeButton = () => {
   const openFolder = async () => {
     const dirHandle = await window.showDirectoryPicker()
     setDirHandle(dirHandle)
-    // console.log(dirHandle)
-    // for await (const [key, value] of dirHandle.entries()) {
-    //   console.log({ key, value })
-    //   value.kind === 'file' && console.log(await value.getFile())
-    // }
     router.push('/explore')
   }
 

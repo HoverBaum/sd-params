@@ -3,16 +3,19 @@
  * directory opened by the user.
  */
 
-import React from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
+import { getHandle, putHandle } from './dirHandleDB'
 
 const defaultDirHandleContextValue = {
   dirHandle: null as FileSystemDirectoryHandle | null,
+  storedHandleAvailable: false,
   setDirHandle: (dirHandle: FileSystemDirectoryHandle) => {},
+  loadDirHandle: async () => false,
 }
 
 type DirHandleContextType = typeof defaultDirHandleContextValue
 
-export const DirHandleContext = React.createContext<DirHandleContextType>(
+export const DirHandleContext = createContext<DirHandleContextType>(
   defaultDirHandleContextValue
 )
 
@@ -21,17 +24,46 @@ export const DirHandleProvider = ({
 }: {
   children: React.ReactNode
 }) => {
-  const [dirHandle, setDirHandle] =
-    React.useState<FileSystemDirectoryHandle | null>(null)
+  const [dirHandle, setDirHandleState] =
+    useState<FileSystemDirectoryHandle | null>(null)
+  const [storedHandleAvailable, setStoredHandleAvailable] = useState(false)
+
+  const setDirHandle = (dirHandle: FileSystemDirectoryHandle) => {
+    setDirHandleState(dirHandle)
+    putHandle(dirHandle).then(() => {
+      setStoredHandleAvailable(true)
+    })
+  }
+
+  const loadDirHandle = async () => {
+    const handle = await getHandle()
+    if (handle) {
+      setDirHandle(handle)
+      return true
+    }
+    return false
+  }
+
+  // Initially check if there is a handle stored.
+  useEffect(() => {
+    const testForHandle = async () => {
+      const handle = await getHandle()
+      if (handle) {
+        setStoredHandleAvailable(true)
+      }
+    }
+    testForHandle()
+  }, [])
 
   return (
-    <DirHandleContext.Provider value={{ dirHandle, setDirHandle }}>
+    <DirHandleContext.Provider
+      value={{ dirHandle, setDirHandle, storedHandleAvailable, loadDirHandle }}
+    >
       {children}
     </DirHandleContext.Provider>
   )
 }
 
 export const useDirHandle = () => {
-  const { dirHandle, setDirHandle } = React.useContext(DirHandleContext)
-  return { dirHandle, setDirHandle }
+  return useContext(DirHandleContext)
 }
