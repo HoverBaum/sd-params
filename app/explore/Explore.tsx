@@ -30,7 +30,17 @@ export const Explore = () => {
   const [images, setImages] = useState<FileType[]>([])
 
   const paramsForFile = async (file: File) => {
-    const exifReaderData = await ExifReader.load(file)
+    let exifReaderData = {} as ExifReader.Tags &
+      ExifReader.XmpTags &
+      ExifReader.IccTags
+    try {
+      exifReaderData = await ExifReader.load(file)
+    } catch (e) {
+      return {
+        parsedForParams: true,
+        paramsError: 'Image has no Exif/tEXt data',
+      }
+    }
 
     if (!exifReaderData.parameters)
       return {
