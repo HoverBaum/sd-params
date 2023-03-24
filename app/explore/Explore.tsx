@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useDirHandle } from '../DirHandleContext'
 import ExifReader from 'exifreader'
 import { AllParams } from './AllParams'
 import { BaseParams } from './BaseParams'
 import { parseRawParams, SDParameterType } from './parseRawParams'
 import Fuse from 'fuse.js'
+import { EmbeddingType, useEmbeddings } from './useEmbeddings'
 
 type FileType = {
   src: string
@@ -18,6 +19,7 @@ type FileType = {
   paramsError?: string
   rawParams?: string
   params?: SDParameterType
+  embeddings?: EmbeddingType[]
 }
 
 export const Explore = () => {
@@ -28,6 +30,8 @@ export const Explore = () => {
   const [searchString, setSearchString] = useState<string>('')
   const [isUsingSearch, setIsUsingSearch] = useState<boolean>(false)
   const [images, setImages] = useState<FileType[]>([])
+
+  const { findEmbeddings, status: embeddingsStatus } = useEmbeddings()
 
   const paramsForFile = async (file: File) => {
     let exifReaderData = {} as ExifReader.Tags &
@@ -218,6 +222,54 @@ export const Explore = () => {
                   >
                     Copy generation data
                   </button>
+
+                  <button
+                    disabled={
+                      embeddingsStatus === 'loading' ||
+                      embeddingsStatus === 'initializing'
+                    }
+                    className={`btn btn-block btn-ghost mt-4 ${
+                      (embeddingsStatus === 'loading' ||
+                        embeddingsStatus === 'initializing') &&
+                      'loading'
+                    }`}
+                    onClick={async () => {
+                      if (!selectedImage.params?.prompt) return
+                      const embeddings = await findEmbeddings(
+                        selectedImage.params.prompt
+                      )
+                      setSelectedImage((value) => {
+                        if (!value) return
+                        return {
+                          ...value,
+                          embeddings,
+                        }
+                      })
+                    }}
+                  >
+                    Find Embeddings
+                  </button>
+
+                  {selectedImage.embeddings && (
+                    <div className="mt-4">
+                      <h2 className="text-2xl">Embeddings</h2>
+                      {selectedImage.embeddings.map((embedding) => (
+                        <div key={embedding.id} className="mt-2">
+                          <span>
+                            {embedding.keyword}:{' '}
+                            <a
+                              href={embedding.link}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="link"
+                            >
+                              {embedding.name}
+                            </a>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
